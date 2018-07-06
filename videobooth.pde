@@ -8,7 +8,7 @@ need
 import processing.video.*;
 Capture cam;
 int cam_w = 1280;
-int cam_h = 720;
+int cam_h = 960;
 
 // GIF export
 boolean ENABLE_GIF = false;
@@ -31,10 +31,11 @@ String dir = "out/";
 int recFrameIndex = 0;
 
 PFont font;
+PImage savedImg;
 
 // messages
 long msgStarted = -999990;
-int msgDuration = 1 * 1000;
+int msgDuration = 7 * 1000;
 String lastMsg = "";
 long countdownStarted = -99999;
 int countdownDuration = 4000;
@@ -45,7 +46,8 @@ PImage [] duplicates = new PImage[100];
 int repeatBy = 3;
 
 public void setup() {
-  size(1280, 720);
+  //size(1280, 720);
+  fullScreen();
   //frameRate(FRAME_RATE);
   frameRate(30);
   noStroke();
@@ -53,6 +55,8 @@ public void setup() {
   textSize(248);
   font = loadFont("Domine-Bold-248.vlw");
   textFont(font);
+
+  savedImg = loadImage("saved.png");
 
   pg = createGraphics(cam_w, cam_h);
 
@@ -71,9 +75,9 @@ public void setup() {
 
     // The camera can be initialized directly using an element
     // from the array returned by list():
-    //cam = new Capture(this, cameras[0]);
+    cam = new Capture(this, cameras[1]);
     // Or, the settings can be defined based on the text in the list
-    cam = new Capture(this, cam_w, cam_h, 15);
+    //cam = new Capture(this, cam_w, cam_h, 15);
 
     // Start capturing the images from the camera
     cam.start();
@@ -100,7 +104,7 @@ void draw() {
   if (isCounting) {
 
     int timeLeft = (countdownDuration - int(millis() - countdownStarted)) / 1000;
-    println(timeLeft);
+    //println(timeLeft);
 
     fill(255);
     stroke(127);
@@ -124,10 +128,16 @@ void draw() {
 
   // display messages
   if (millis() < msgStarted + msgDuration) {
-    fill(255);
-    stroke(127);
-    strokeWeight(4);
-    text(lastMsg, width/2, height/2);
+    if (lastMsg == "saved!") {
+      imageMode(CENTER);
+      image(savedImg, width/2, height/2);
+      imageMode(CORNER);
+    } else {
+      fill(255);
+      stroke(127);
+      strokeWeight(4);
+      text(lastMsg, width/2, height/2);
+    }
   }
 
   if (isRecording) {
@@ -241,6 +251,6 @@ void uploadFile() {
   }
 
   // upload to server
-  String ftp[] = loadStrings("http://localhost:8888/reeves/videobooth/"+dir+"uploader.php?value="+fn);
+  String ftp[] = loadStrings("http://localhost:8888/videobooth/"+dir+"uploader.php?value="+fn);
   printArray(ftp); // report
 }
